@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+<script>
+  window.TrackJS && TrackJS.install({ 
+    token: "2e63f8060e1b4c758934f4cc293068c8"
+    // for more configuration options, see https://docs.trackjs.com
+  });
+</script>
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -91,16 +99,134 @@
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      const output = document.querySelector('output');
+      const firstNumRaw = document.querySelector('#first-num').value.trim();
+      const secondNumRaw = document.querySelector('#second-num').value.trim();
+      const operator = document.querySelector('#operator').value;
+
+      try {
+        if (!/^-?\d+(\.\d+)?$/.test(firstNumRaw) || !/^-?\d+(\.\d+)?$/.test(secondNumRaw)) {
+          throw new Error('One of the inputs is not a valid number!');
+        }
+
+        const firstNum = parseFloat(firstNumRaw);
+        const secondNum = parseFloat(secondNumRaw);
+        
+        class MathError extends Error {
+        constructor(message) {
+          super(message);
+          this.name = 'MathError';
+        }
+        }
+
+        if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new Error('Input is not a number');
+        }
+
+        if (operator === '/' && secondNum === 0) {
+          throw new MathError('Custom MathError: Cannot divide by zero!');
+        }
+
+        const result = eval(`${firstNum} ${operator} ${secondNum}`);
+        output.innerHTML = result;
+      
+      } 
+      catch (err) {
+        console.error('Sadly an error happened my friend');
+        console.error(err);
+        output.innerHTML = 'Error';
+      } 
+      finally {
+        console.log('Calculation attempt finished (try/catch/finally demo)');
+      }
     });
+
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
+
+    errorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const label = btn.textContent;
+        switch (label) {
+          case 'Console Log':
+            console.log('Console Log Demo');
+            break;
+          case 'Console Error':
+            console.error('Console Error Demo');
+            break;
+          case 'Console Count':
+            console.count('Count button:');
+            break;
+          case 'Console Warn':
+            console.warn('Console Warn Button');
+            break;
+          case 'Console Assert':
+            const num = 2;
+            console.assert(num == 3, 'The number does not equal 3');
+            break;
+          case 'Console Clear':
+            console.clear();
+            break;
+          case 'Console Dir':
+            console.dir(document.querySelectorAll('button')[7]);
+            break;
+          case 'Console dirxml':
+            console.dirxml(document.querySelectorAll('button')[8]);
+            break;
+          case 'Console Group Start':
+            console.group('console.group');
+            break;
+          case 'Console Group End':
+            console.groupEnd();
+            break;
+          case 'Console Table':
+            console.table([
+              { name: 'Software Engineering', num: 110 },
+              { name: 'Programming Languages', num: 130 },
+              { name: 'Advanced Software Engineering', num: 112 }
+            ]);
+            break;
+          case 'Start Timer':
+            console.time('Timer Button');
+            break;
+          case 'End Timer':
+            console.timeEnd('Timer Button');
+            break;
+          case 'Console Trace':
+            function deep() {
+              deeper();
+            }
+
+            function deeper() {
+              deepest();
+            }
+
+            function deepest() {
+              console.trace();
+            }
+
+            function handleBtnClick() {
+              deep();
+            }
+            handleBtnClick();
+            break;
+
+          case 'Trigger a Global Error':
+            boom();
+            break;
+        }
+      });
+    });
+
+    window.onerror = function (message, source, lineno, colno, error) {
+    console.log('Global Error Caught!');
+    console.log('Message:', message);
+    console.log('Source:', source);
+    console.log('Line:', lineno, 'Column:', colno);
+    console.log('Error Object:', error);
+};
     // You may move this JS to another file if you wish
   </script>
 </body>
